@@ -1,29 +1,41 @@
-import express from 'express';
-import serverless from 'serverless-http';
-import cors from 'cors';
+exports.handler = async (event, context) => {
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Content-Type": "application/json"
+  };
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+  if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 200, headers, body: "" };
+  }
 
-let memories = [];
+  const path = event.path || "/";
 
-app.get('/', (req, res) => {
-  res.json({ name: "AI-Bridge API", dims: 384, status: "live on Netlify" });
-});
+  if (event.httpMethod === "GET") {
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ 
+        name: "AI-Bridge API", 
+        status: "live", 
+        endpoint: "https://aibridge-api.netlify.app",
+        time: new Date().toISOString()
+      })
+    };
+  }
 
-app.post('/save', (req, res) => {
-  const { text } = req.body;
-  memories.push({ id: Date.now(), text, created: new Date().toISOString() });
-  res.json({ ok: true, total: memories.length });
-});
+  if (event.httpMethod === "POST") {
+    try {
+      const body = JSON.parse(event.body || "{}");
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ ok: true, saved: body, message: "Saved from Enugu!" })
+      };
+    } catch(e) {
+      return { statusCode: 400, headers, body: JSON.stringify({ ok: false, error: e.message }) };
+    }
+  }
 
-app.post('/search', (req, res) => {
-  const { query } = req.body;
-  const results = memories.filter(m => 
-    m.text.toLowerCase().includes(query.toLowerCase())
-  ).slice(0,5);
-  res.json(results);
-});
-
-export const handler = serverless(app);
+  return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+};
