@@ -4,7 +4,7 @@
 <h1>AI-Bridge API is Live</h1>
 <p>Use / to test</p>
 <script>
-fetch('/api').then(r=>r.json()).then(d=>{
+fetch('/api/').then(r=>r.json()).then(d=>{
  document.body.innerHTML += '<pre>'+JSON.stringify(d,null,2)+'</pre>';
 });
 </script>
